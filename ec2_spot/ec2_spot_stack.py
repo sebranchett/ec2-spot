@@ -24,6 +24,7 @@ class Ec2SpotStack(Stack):
                            )
 
         # Spot fleet
+        template_file = self.template_file
         iamFleetRole = "arn:aws:iam::" + \
                        self.account + \
                        ":role/aws-ec2-spot-fleet-tagging-role"
@@ -37,8 +38,11 @@ class Ec2SpotStack(Stack):
         # Always tag
         my_tags = [ec2.CfnSpotFleet.SpotFleetTagSpecificationProperty(
             resource_type="instance",
-            tags=[CfnTag(key="Creator", value="SEB")]
+            tags=[CfnTag(key="Creator", value="SEB"),
+                  CfnTag(key="Template", value=template_file)]
             )]
+        with open("./user_data/user_data.sh") as f:
+            my_user_data = f.read()
 
         # If you specify LaunchSpecifications,
         # you can’t specify LaunchTemplateConfigs
@@ -47,8 +51,8 @@ class Ec2SpotStack(Stack):
                         instance_type=my_instance_type,
                         spot_price=max_spot_price,
                         tag_specifications=my_tags,
+                        user_data=my_user_data
                         )]
-#                        user_data=
 #                        subnet_id=
 
         config_data = ec2.CfnSpotFleet.SpotFleetRequestConfigDataProperty(
