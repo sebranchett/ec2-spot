@@ -28,24 +28,26 @@ class Ec2SpotStack(Stack):
                        self.account + \
                        ":role/aws-ec2-spot-fleet-tagging-role"
 
-        # Deep Learning Base AMI (Ubuntami-02u 18.04) Version 50.0 in Frankfurt
-        my_ami = "ami-03ab7bf8ed4e51280"
-        my_instance_type = ec2.InstanceType("t2.small")
+        # amazon/Deep Learning Base AMI (Amazon Linux) Version 31.1
+        # in Frankfurt, found using:
+        # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html#finding-an-ami-aws-cli
+        my_ami = "ami-001785e22bc8fd37c"
+        my_instance_type = "t2.small"
         max_spot_price = "0.02"
         # Always tag
-        my_tags = ec2.CfnSpotFleet.SpotFleetTagSpecificationProperty(
-            resource_type="resourceType",
+        my_tags = [ec2.CfnSpotFleet.SpotFleetTagSpecificationProperty(
+            resource_type="instance",
             tags=[CfnTag(key="Creator", value="SEB")]
-            )
+            )]
 
         # If you specify LaunchSpecifications,
         # you can’t specify LaunchTemplateConfigs
-        launch_specs = ec2.CfnSpotFleet.SpotFleetLaunchSpecificationProperty(
+        launch_specs = [ec2.CfnSpotFleet.SpotFleetLaunchSpecificationProperty(
                         image_id=my_ami,
-                        )
-                        # instance_type=my_instance_type,
-                        # spot_price=max_spot_price,
-                        # tag_specifications=my_tags
+                        instance_type=my_instance_type,
+                        spot_price=max_spot_price,
+                        tag_specifications=my_tags,
+                        )]
 #                        user_data=
 #                        subnet_id=
 
