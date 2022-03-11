@@ -1,3 +1,4 @@
+from base64 import b64encode, decode
 from aws_cdk import (
     # Duration,
     Stack,
@@ -17,8 +18,8 @@ my_tags = [ec2.CfnSpotFleet.SpotFleetTagSpecificationProperty(
     resource_type="instance",
     tags=[CfnTag(key="Creator", value="SEB")]
     )]
-with open("./user_data/user_data.sh") as f:
-    my_user_data = f.read()
+byte_data = open("./user_data/user_data.sh", "rb").read()
+my_user_data = b64encode(byte_data).decode()
 
 
 class Ec2SpotStack(Stack):
