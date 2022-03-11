@@ -12,7 +12,7 @@ from constructs import Construct
 # in Frankfurt, found using:
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html#finding-an-ami-aws-cli
 my_ami = "ami-03ab7bf8ed4e51280"
-my_instance_type = "t2.small"
+my_instance_types = ["t2.small", "t2.medium", "m3.medium"]
 my_max_spot_price = "0.02"
 my_tags = [ec2.CfnSpotFleet.SpotFleetTagSpecificationProperty(
     resource_type="instance",
@@ -42,27 +42,19 @@ class Ec2SpotStack(Stack):
                              ]
                          )
         my_subnets = my_vpc.select_subnets().subnet_ids
-        print(my_subnets)
-        # Spot fleet
-        # If you specify LaunchSpecifications,
-        # you can’t specify LaunchTemplateConfigs
-        # launch_specs = \
-        #     [ec2.CfnSpotFleet.SpotFleetLaunchSpecificationProperty(
-        #                 image_id="ami-03ab7bf8ed4e51280",
-        #                 instance_type="t2.medium",
-        #                 ),
-        #                 ec2.CfnSpotFleet.SpotFleetLaunchSpecificationProperty(
-        #                 image_id="ami-03ab7bf8ed4e51280",
-        #                 instance_type="t2.small",
-        #                 ),
-        #                 ec2.CfnSpotFleet.SpotFleetLaunchSpecificationProperty(
-        #                 image_id="ami-03ab7bf8ed4e51280",
-        #                 instance_type="m3.medium",
-        #                 ),
-        #                 ]
-        #                 # tag_specifications=my_tags,
-        #                 # user_data=my_user_data
 
+        my_launch_specs = []
+        for subnet in my_subnets:
+            for inst_type in my_instance_types:
+                my_launch_specs.append(
+                    ec2.CfnSpotFleet.SpotFleetLaunchSpecificationProperty(
+                        image_id=my_ami,
+                        instance_type=inst_type,
+                        subnet_id=subnet,
+                        )
+                    )
+
+        # Spot fleet
         config_data = \
             ec2.CfnSpotFleet.SpotFleetRequestConfigDataProperty(
                 allocation_strategy="capacityOptimized",
@@ -71,23 +63,7 @@ class Ec2SpotStack(Stack):
                 target_capacity=1,
                 terminate_instances_with_expiration=True,
                 type="request",
-                launch_specifications=[
-                    ec2.CfnSpotFleet.SpotFleetLaunchSpecificationProperty(
-                        image_id="ami-03ab7bf8ed4e51280",
-                        instance_type="t2.medium",
-                        subnet_id=my_subnets[0],
-                    ),
-                    ec2.CfnSpotFleet.SpotFleetLaunchSpecificationProperty(
-                        image_id="ami-03ab7bf8ed4e51280",
-                        instance_type="t2.small",
-                        subnet_id=my_subnets[0],
-                    ),
-                    ec2.CfnSpotFleet.SpotFleetLaunchSpecificationProperty(
-                        image_id="ami-03ab7bf8ed4e51280",
-                        instance_type="m3.medium",
-                        subnet_id=my_subnets[0],
-                    ),
-                    ]
+                launch_specifications=my_launch_specs
                 )
 
         ec2.CfnSpotFleet(
