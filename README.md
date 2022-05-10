@@ -6,6 +6,15 @@ https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html
 and this:
 https://docs.aws.amazon.com/cdk/v2/guide/work-with.html#work-with-prerequisites
 
+If you are running on Windows (with Git Bash), activate the virtual environment with:
+```
+source .venv/Scripts/activate
+```
+instead of:
+```
+source .venv/bin/activate
+```
+
 To Do:
 - add user data to define what should happen on the instance
 - give the instance read access to the internet so that it can collect Docker images
